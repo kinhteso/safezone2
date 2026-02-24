@@ -18,6 +18,14 @@ export const metadata: Metadata = {
   title: "SafeZone — Vùng an toàn số cho thế hệ trẻ Việt Nam",
   description:
     "Nền tảng phòng chống ma túy học đường: CMS, SafeBot AI, tố giác ẩn danh, dashboard.",
+  applicationName: "Safezone",
+  manifest: "/manifest.webmanifest",
+  themeColor: "#0A2D6E",
+  appleWebApp: {
+    title: "Safezone",
+    statusBarStyle: "default",
+    capable: true,
+  },
 };
 
 export default function RootLayout({
@@ -27,6 +35,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="vi">
+      <head>
+        <link rel="icon" href="/icons/safezone-icon-192.png" />
+        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+      </head>
       <body className={`${beVietnam.variable} ${montserrat.variable}`}>
         {children}
       </body>

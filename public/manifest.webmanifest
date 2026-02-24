@@ -1,0 +1,23 @@
+{
+  "name": "Safezone",
+  "short_name": "Safezone",
+  "description": "SafeZone — Vùng an toàn số cho thế hệ trẻ Việt Nam",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F8FAFC",
+  "theme_color": "#0A2D6E",
+  "icons": [
+    {
+      "src": "/icons/safezone-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/safezone-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
