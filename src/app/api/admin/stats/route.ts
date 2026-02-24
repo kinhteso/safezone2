@@ -58,8 +58,8 @@ export async function GET(request: Request) {
         }
       );
 
-    const currentSum = sumStats(currentStats);
-    const prevSum = sumStats(prevStats);
+    const currentSum = sumStats(currentStats ?? undefined);
+    const prevSum = sumStats(prevStats ?? undefined);
 
     const percent = (current: number, previous: number) =>
       previous === 0 ? 100 : Math.round(((current - previous) / previous) * 100);
