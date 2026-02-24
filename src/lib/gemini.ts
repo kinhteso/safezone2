@@ -11,11 +11,18 @@ Bạn là SafeBot, trợ lý AI của SafeZone.
 - Giới hạn độ dài câu trả lời: tối đa 300 từ
 `.trim();
 
-const apiKey = process.env.GOOGLE_API_KEY;
-if (!apiKey) {
-  throw new Error("Missing GOOGLE_API_KEY");
+let genAI: GoogleGenerativeAI | null = null;
+
+function getClient() {
+  const apiKey = process.env.GOOGLE_API_KEY;
+  if (!apiKey) {
+    throw new Error("Missing GOOGLE_API_KEY");
+  }
+  if (!genAI) {
+    genAI = new GoogleGenerativeAI(apiKey);
+  }
+  return genAI;
 }
-const genAI = new GoogleGenerativeAI(apiKey);
 
 const DEFAULT_FALLBACKS = [
   "gemini-2.5-flash",
@@ -29,6 +36,7 @@ export async function askGemini(
   message: string,
   history: Array<{ role: "user" | "assistant"; content: string }>
 ) {
+  const client = getClient();
   const mappedHistory = history.map((item) => ({
     role: item.role === "assistant" ? "model" : "user",
     parts: [{ text: item.content }],
@@ -45,7 +53,7 @@ export async function askGemini(
   let lastError: unknown;
   for (const modelName of modelQueue) {
     try {
-      const model = genAI.getGenerativeModel({
+      const model = client.getGenerativeModel({
         model: modelName,
         systemInstruction: SYSTEM_PROMPT,
       });
