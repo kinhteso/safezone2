@@ -1,26 +1,101 @@
-@import "tailwindcss";
+@import "react-quill/dist/quill.snow.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  color-scheme: light;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  @apply bg-gray-50 text-gray-800 antialiased;
+  font-family: var(--font-body), sans-serif;
+}
+
+.container-safe {
+  @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8;
+}
+
+.btn-primary {
+  @apply rounded-xl bg-blue-mid px-6 py-3 font-bold text-white transition hover:bg-blue-deep;
+}
+
+.btn-secondary {
+  @apply rounded-xl border-2 border-blue-mid px-6 py-3 font-semibold text-blue-mid transition hover:bg-blue-50;
+}
+
+.btn-danger {
+  @apply rounded-xl bg-red-alert px-6 py-3 font-bold text-white transition hover:bg-red-600;
+}
+
+.card {
+  @apply rounded-2xl border border-gray-100 bg-white p-8 shadow-sm transition hover:-translate-y-1 hover:shadow-soft;
+}
+
+.input {
+  @apply w-full rounded-xl border-2 border-gray-200 px-4 py-3 font-body transition focus:border-blue-light focus:outline-none;
+}
+
+.glass-panel {
+  @apply rounded-2xl border border-white/60 bg-white/70 backdrop-blur;
+}
+
+.hero-glow {
+  background: radial-gradient(circle at 20% 20%, #e8f4fd 0%, transparent 55%),
+    radial-gradient(circle at 80% 10%, rgba(27, 108, 168, 0.12), transparent 50%),
+    radial-gradient(circle at 60% 80%, rgba(59, 159, 232, 0.15), transparent 55%);
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: revealIn 0.6s ease-out forwards;
+}
+
+.reveal-delay-1 {
+  animation-delay: 0.08s;
+}
+
+.reveal-delay-2 {
+  animation-delay: 0.16s;
+}
+
+.reveal-delay-3 {
+  animation-delay: 0.24s;
+}
+
+.reveal-delay-4 {
+  animation-delay: 0.32s;
+}
+
+@keyframes revealIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal-delay-1,
+  .reveal-delay-2,
+  .reveal-delay-3,
+  .reveal-delay-4 {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.mobile-nav {
+  @apply fixed bottom-4 left-1/2 z-50 flex w-[92%] -translate-x-1/2 items-center justify-between rounded-2xl border border-gray-100 bg-white/95 px-4 py-3 shadow-soft backdrop-blur lg:hidden;
+}
+
+.mobile-nav__item {
+  @apply flex flex-1 items-center justify-center rounded-xl px-2 py-2 text-gray-400 transition;
+}
+
+.mobile-nav__item.is-active {
+  @apply bg-blue-pale text-blue-deep;
 }
