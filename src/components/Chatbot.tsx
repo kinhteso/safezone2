@@ -54,7 +54,10 @@ export default function Chatbot() {
 
   const sendMessage = async (text: string) => {
     if (!text.trim() || loading || remaining <= 0) return;
-    const nextMessages = [...messages, { role: "user", content: text }];
+    const nextMessages: Message[] = [
+      ...messages,
+      { role: "user", content: text },
+    ];
     setMessages(nextMessages);
     setInput("");
     setLoading(true);
