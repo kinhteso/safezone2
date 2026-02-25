@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -19,8 +20,15 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/90 backdrop-blur">
       <div className="container-safe flex h-[68px] items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <span className="text-2xl">🛡️</span>
+        <Link href="/" className="flex items-center gap-3">
+          <Image
+            src="/icons/safezone-logo.png"
+            alt="SafeZone Logo"
+            width={40}
+            height={40}
+            className="h-10 w-10 rounded-lg object-cover"
+            priority
+          />
           <div className="leading-tight">
             <p className="font-display text-lg font-extrabold text-blue-deep">
               SafeZone

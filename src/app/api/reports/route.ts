@@ -4,6 +4,10 @@ import { z } from "zod";
 import crypto from "crypto";
 import { Resend } from "resend";
 import { createAdminClient } from "../../../lib/supabase/admin";
+import {
+  appendDemoReport,
+  isMissingReportsTableError,
+} from "../../../lib/demoReportsStore";
 
 const schema = z.object({
   category: z.enum(["use", "deal", "pressure", "other"]),
@@ -15,11 +19,12 @@ const schema = z.object({
 
 export async function POST(request: Request) {
   try {
+    const isDemoMode = process.env.ADMIN_DEMO_MODE === "true";
     const payload = await request.json();
     const parsed = schema.safeParse(payload);
     if (!parsed.success) {
       return NextResponse.json(
-        { message: "Dữ liệu không hợp lệ." },
+        { message: "Du lieu khong hop le." },
         { status: 400 }
       );
     }
@@ -35,17 +40,19 @@ export async function POST(request: Request) {
 
     const supabase = createAdminClient();
     const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-    const { data: recentReports } = await supabase
-      .from("reports")
-      .select("id")
-      .eq("ip_hash", ipHash)
-      .gte("created_at", since);
+    if (!isDemoMode) {
+      const { data: recentReports } = await supabase
+        .from("reports")
+        .select("id")
+        .eq("ip_hash", ipHash)
+        .gte("created_at", since);
 
-    if ((recentReports?.length ?? 0) >= 5) {
-      return NextResponse.json(
-        { message: "Bạn đã vượt quá giới hạn tố giác trong 24h." },
-        { status: 429 }
-      );
+      if ((recentReports?.length ?? 0) >= 5) {
+        return NextResponse.json(
+          { message: "Ban da vuot qua gioi han to giac trong 24h." },
+          { status: 429 }
+        );
+      }
     }
 
     let schoolId: string | null = null;
@@ -72,30 +79,46 @@ export async function POST(request: Request) {
       .single();
 
     if (error) {
+      if (isDemoMode && isMissingReportsTableError(error.message)) {
+        const demoReport = await appendDemoReport({
+          category: parsed.data.category,
+          area: parsed.data.area,
+          description: parsed.data.description,
+          school_name: parsed.data.schoolName ?? null,
+        });
+        return NextResponse.json({ success: true, refCode: demoReport.ref_code });
+      }
       return NextResponse.json(
-        { message: "Không thể lưu tố giác." },
+        {
+          message: isDemoMode
+            ? `Khong the luu to giac: ${error.message}`
+            : "Khong the luu to giac.",
+        },
         { status: 500 }
       );
     }
 
-    const resend = new Resend(process.env.RESEND_API_KEY);
-    await resend.emails.send({
-      from: "SafeZone <no-reply@safezone.tlu.edu.vn>",
-      to: process.env.ADMIN_EMAIL!,
-      subject: "SafeZone - Tố giác mới",
-      html: `
-        <p>Đã nhận tố giác mới.</p>
-        <p>Mã tham chiếu: <strong>${inserted.ref_code}</strong></p>
-        <p>Loại: ${parsed.data.category}</p>
-        <p>Khu vực: ${parsed.data.area ?? "-"}</p>
-      `,
-    });
+    if (process.env.RESEND_API_KEY && process.env.ADMIN_EMAIL) {
+      try {
+        const resend = new Resend(process.env.RESEND_API_KEY);
+        await resend.emails.send({
+          from: "SafeZone <no-reply@safezone.tlu.edu.vn>",
+          to: process.env.ADMIN_EMAIL,
+          subject: "SafeZone - To giac moi",
+          html: `
+            <p>Da nhan to giac moi.</p>
+            <p>Ma tham chieu: <strong>${inserted.ref_code}</strong></p>
+            <p>Loai: ${parsed.data.category}</p>
+            <p>Khu vuc: ${parsed.data.area ?? "-"}</p>
+          `,
+        });
+      } catch {
+        // Keep the submission successful even if email notification fails.
+      }
+    }
 
     return NextResponse.json({ success: true, refCode: inserted.ref_code });
-  } catch (error) {
-    return NextResponse.json(
-      { message: "Có lỗi xảy ra." },
-      { status: 500 }
-    );
+  } catch {
+    return NextResponse.json({ message: "Co loi xay ra." }, { status: 500 });
   }
 }

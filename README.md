@@ -1,36 +1,67 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+﻿# SafeZone App
 
-## Getting Started
+SafeZone la nen tang ho tro phong ngua ma tuy hoc duong, ket hop noi dung truyen thong, kenh to giac an danh, chatbot ho tro va dashboard quan tri.
 
-First, run the development server:
+## Tinh nang chinh
+
+- Trang public gom: Home, News, Chatbot, Report.
+- Quan tri noi dung bai viet theo cac nhom: `news`, `knowledge`, `law`, `research`.
+- Nhan to giac an danh qua API server.
+- Dashboard thong ke cho admin.
+- Logo moi va bo icon PWA da duoc cap nhat.
+- Thu vien bai viet featured + thumbnail minh hoa cho demo.
+- Co che fallback demo khi chua co bang `reports` (luu tam vao `tmp/demo-reports.json` khi `ADMIN_DEMO_MODE=true`).
+
+## Cong nghe
+
+- Next.js 14 (App Router)
+- TypeScript
+- Tailwind CSS
+- Supabase (Auth + Postgres)
+- Recharts
+
+## Chay local
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Mo trinh duyet:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Public: `http://localhost:3000`
+- Admin dashboard: `http://localhost:3000/admin/dashboard`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Bien moi truong can thiet
 
-## Learn More
+Tao file `.env.local`:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+SUPABASE_SERVICE_ROLE_KEY=...
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+GOOGLE_API_KEY=...
+GEMINI_MODEL=gemini-2.5-flash
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+RESEND_API_KEY=...
+ADMIN_EMAIL=...
 
-## Deploy on Vercel
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+NEXT_PUBLIC_APP_NAME=SafeZone
+ADMIN_DEMO_MODE=true
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Luu y demo reports
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Neu Supabase chua co bang `public.reports`:
+
+- API `/api/reports` se fallback luu local vao `tmp/demo-reports.json` (chi khi `ADMIN_DEMO_MODE=true`).
+- Dashboard van hien du lieu test de demo.
+
+Khi deploy production, nen tao day du schema Supabase va tat demo mode (`ADMIN_DEMO_MODE=false`).
+
+## Tai lieu lien quan
+
+- [INSTALL.md](./INSTALL.md): tai lieu mo ta + huong dan trien khai chi tiet.
+- [Install_App.md](./Install_App.md): huong dan dong goi app (PWA/Capacitor).

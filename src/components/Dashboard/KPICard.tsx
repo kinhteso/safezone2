@@ -9,10 +9,12 @@ export default function KPICard({ label, value, change }: KPICardProps) {
   return (
     <div className="card">
       <p className="text-sm text-gray-400">{label}</p>
-      <p className="mt-2 font-display text-3xl font-bold text-blue-deep">
-        {value}
-      </p>
-      <p className={`mt-2 text-sm font-semibold ${isPositive ? "text-green-safe" : "text-red-alert"}`}>
+      <p className="mt-2 font-display text-3xl font-bold text-blue-deep">{value}</p>
+      <p
+        className={`mt-2 text-sm font-semibold ${
+          isPositive ? "text-green-safe" : "text-red-alert"
+        }`}
+      >
         {isPositive ? "+" : ""}
         {change}% so với kỳ trước
       </p>

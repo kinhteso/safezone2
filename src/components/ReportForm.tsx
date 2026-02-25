@@ -70,7 +70,11 @@ export default function ReportForm({ schoolCode }: { schoolCode?: string }) {
       setArea("");
       setSchoolName("");
     } catch (err) {
-      setError("Không thể gửi tố giác. Vui lòng thử lại.");
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Không thể gửi tố giác. Vui lòng thử lại.";
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -108,9 +112,7 @@ export default function ReportForm({ schoolCode }: { schoolCode?: string }) {
           </label>
           <textarea
             className={`mt-2 min-h-[150px] w-full rounded-2xl border-2 px-4 py-3 focus:outline-none ${
-              description.length < 20
-                ? "border-red-200"
-                : "border-gray-200"
+              description.length < 20 ? "border-red-200" : "border-gray-200"
             }`}
             value={description}
             onChange={(event) => setDescription(event.target.value)}
@@ -128,9 +130,7 @@ export default function ReportForm({ schoolCode }: { schoolCode?: string }) {
 
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           <div>
-            <label className="text-sm font-semibold text-gray-800">
-              Khu vực
-            </label>
+            <label className="text-sm font-semibold text-gray-800">Khu vực</label>
             <select
               className="input mt-2"
               value={area}
@@ -145,9 +145,7 @@ export default function ReportForm({ schoolCode }: { schoolCode?: string }) {
             </select>
           </div>
           <div>
-            <label className="text-sm font-semibold text-gray-800">
-              Tên trường
-            </label>
+            <label className="text-sm font-semibold text-gray-800">Tên trường</label>
             <input
               className="input mt-2"
               placeholder="Ví dụ: THPT ABC"
@@ -175,8 +173,7 @@ export default function ReportForm({ schoolCode }: { schoolCode?: string }) {
               Tố giác đã được ghi nhận.
             </p>
             <p className="mt-1 text-sm text-gray-800">
-              Mã tham chiếu:{" "}
-              <span className="font-mono font-bold">{refCode}</span>
+              Mã tham chiếu: <span className="font-mono font-bold">{refCode}</span>
             </p>
             <p className="text-xs text-gray-400">
               Vui lòng lưu mã này để theo dõi trạng thái.
@@ -185,7 +182,7 @@ export default function ReportForm({ schoolCode }: { schoolCode?: string }) {
         ) : null}
       </div>
 
-      <aside className="space-y-6 lg:sticky lg:top-24 h-fit">
+      <aside className="h-fit space-y-6 lg:sticky lg:top-24">
         <div className="rounded-2xl bg-red-alert p-6 text-white">
           <p className="text-sm font-semibold">Hotline hỗ trợ khẩn cấp</p>
           <p className="mt-2 text-2xl font-bold">1800 1234</p>
@@ -201,9 +198,7 @@ export default function ReportForm({ schoolCode }: { schoolCode?: string }) {
             "Phản hồi kết quả",
           ].map((step, index) => (
             <div key={step} className="flex gap-3 text-sm text-gray-400">
-              <span className="font-semibold text-blue-mid">
-                {index + 1}
-              </span>
+              <span className="font-semibold text-blue-mid">{index + 1}</span>
               <span>{step}</span>
             </div>
           ))}

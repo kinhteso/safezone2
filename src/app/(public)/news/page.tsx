@@ -1,4 +1,5 @@
 import NewsListClient from "../../../components/NewsListClient";
+import { mergePostsWithFeatured } from "../../../lib/featuredPosts";
 import { createServerClient } from "../../../lib/supabase/server";
 import type { Post } from "../../../types";
 
@@ -17,13 +18,13 @@ export default async function NewsPage({
     .eq("published", true)
     .order("created_at", { ascending: false });
 
-  const posts = (data ?? []) as Post[];
+  const posts = mergePostsWithFeatured(data as Post[] | null | undefined);
 
   return (
     <section className="container-safe py-12">
       <div className="space-y-3">
         <p className="text-sm font-semibold uppercase text-blue-mid">
-          Tin tức & tài liệu
+          Tin tức và tài liệu
         </p>
         <h1 className="reveal font-display text-3xl font-bold text-blue-deep md:text-4xl">
           Cập nhật mới nhất

@@ -1,26 +1,41 @@
-# SafeZone — Hướng Dẫn Cài Đặt (Local + Deploy)
+﻿# SafeZone - Tai Lieu Mo Ta va Huong Dan Trien Khai
 
-Tài liệu này hướng dẫn cài đặt và chạy SafeZone Phase 1 theo đặc tả kỹ thuật.
+Tai lieu nay mo ta phien ban hien tai cua SafeZone va cach trien khai trong moi truong dev/prod.
 
-## Yêu cầu môi trường
+## 1. Tong quan he thong
+
+SafeZone gom 4 khoi chinh:
+
+1. News/CMS: bai viet thuoc nhom tin tuc, kien thuc, phap luat, nghien cuu.
+2. Chatbot: ho tro hoi dap va dinh huong thong tin.
+3. Report: gui to giac an danh.
+4. Admin dashboard: KPI, bieu do, danh sach to giac moi.
+
+Cap nhat moi trong ban nay:
+
+- Da cap nhat logo chinh: `public/icons/safezone-logo.png`.
+- Da cap nhat bo icon PWA (`192`, `512`, `apple-touch-icon`).
+- Da bo sung tap bai viet featured va thumbnail bieu trung trong `public/news-thumbnails`.
+- Da bo sung fallback demo reports khi chua co bang `reports`.
+- Da toi uu dashboard de co du lieu chu ky de demo khi API tra rong.
+
+## 2. Yeu cau moi truong
 
 - Node.js 18+
 - npm 9+
-- Tài khoản Supabase
-- Google AI Studio API key (Gemini)
-- Resend API key
+- Tai khoan Supabase
+- API key cho Gemini (neu dung chatbot)
+- RESEND_API_KEY (neu gui email thong bao)
 
-## 1. Cài đặt project
+## 3. Cai dat
 
 ```bash
-git clone https://github.com/<user>/safezone-app.git
+git clone https://github.com/kinhteso/safezone2.git
 cd safezone-app
 npm install
 ```
 
-## 2. Tạo `.env.local`
-
-Tạo file `.env.local` ở root dự án:
+## 4. Tao `.env.local`
 
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=...
@@ -35,60 +50,54 @@ ADMIN_EMAIL=safezone.tlu@gmail.com
 
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 NEXT_PUBLIC_APP_NAME=SafeZone
+ADMIN_DEMO_MODE=true
 ```
 
-## 3. Thiết lập Supabase
-
-1. Tạo project mới trên Supabase.
-2. Mở SQL Editor và chạy toàn bộ schema trong đặc tả Phase 1.
-3. Bật RLS cho các bảng theo spec.
-4. Tạo Storage bucket `thumbnails` (Public).
-5. (Tuỳ chọn) Seed dữ liệu trường pilot:
-
-```sql
-INSERT INTO schools (name, code, type, province)
-VALUES ('Đại học Thủy Lợi', 'TLU', 'university', 'Hà Nội');
-```
-
-## 4. Chạy dev server
+## 5. Chay local
 
 ```bash
 npm run dev
 ```
 
-Mở `http://localhost:3000`.
+URL nhanh:
 
-## 5. Test nhanh
+- `/`
+- `/news`
+- `/chatbot`
+- `/report`
+- `/admin/dashboard`
 
-- Trang chủ: `/`
-- Tin tức: `/news`
-- SafeBot: `/chatbot`
-- Tố giác: `/report`
-- Admin: `/admin/login`
+## 6. Luu y schema Supabase
 
-## 6. Deploy lên Vercel
+Can tao day du cac bang theo thiet ke cua du an, toi thieu gom:
 
-### Cách 1: Dashboard
+- `posts`
+- `reports`
+- `daily_stats`
+- `schools`
 
-1. Push code lên GitHub.
-2. Vercel → New Project → Import repo.
-3. Add Environment Variables từ `.env.local`.
-4. Deploy.
+Neu chua co bang `reports` va dang demo mode:
 
-### Cách 2: CLI
+- API van cho gui to giac.
+- Du lieu demo duoc ghi vao `tmp/demo-reports.json`.
+- Dashboard van hien du lieu test.
 
-```bash
-npm i -g vercel
-vercel login
-vercel --prod
-```
+## 7. Deploy
 
-## 7. Lưu ý bảo mật
+Co the deploy len Vercel. Sau khi deploy:
 
-- Không expose `SUPABASE_SERVICE_ROLE_KEY` ở client.
-- Chỉ chạy API admin bằng server-side.
-- Thu hồi và tạo mới API key nếu lộ.
+- Set day du env variables tren Vercel.
+- Set `NEXT_PUBLIC_SITE_URL` bang domain that.
+- Khuyen nghi `ADMIN_DEMO_MODE=false` cho production.
 
----
+## 8. Kiem tra nhanh sau deploy
 
-Nếu cần hỗ trợ thêm, liên hệ: `safezone.tlu@gmail.com`
+1. Gui thu report tai `/report`.
+2. Vao `/admin/dashboard` kiem tra KPI + bieu do + bang report.
+3. Kiem tra `/news` va trang chi tiet bai viet.
+
+## 9. Bao mat
+
+- Khong expose `SUPABASE_SERVICE_ROLE_KEY` cho client.
+- Tat demo mode khi dua vao production.
+- Gioi han quyen truy cap admin qua auth + middleware.

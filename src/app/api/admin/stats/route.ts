@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "../../../../lib/supabase/admin";
 import { createServerClient } from "../../../../lib/supabase/server";
+import {
+  isMissingReportsTableError,
+  readDemoReports,
+} from "../../../../lib/demoReportsStore";
 
 const CATEGORY_COLORS: Record<string, string> = {
   use: "#1B6CA8",
@@ -11,12 +15,15 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 export async function GET(request: Request) {
   try {
-    const supabaseAuth = await createServerClient();
-    const {
-      data: { user },
-    } = await supabaseAuth.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    const isDemoMode = process.env.ADMIN_DEMO_MODE === "true";
+    if (!isDemoMode) {
+      const supabaseAuth = await createServerClient();
+      const {
+        data: { user },
+      } = await supabaseAuth.auth.getUser();
+      if (!user) {
+        return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+      }
     }
 
     const { searchParams } = new URL(request.url);
@@ -64,18 +71,37 @@ export async function GET(request: Request) {
     const percent = (current: number, previous: number) =>
       previous === 0 ? 100 : Math.round(((current - previous) / previous) * 100);
 
-    const { data: reports } = await supabase
+    const reportsRes = await supabase
       .from("reports")
       .select("id, category, created_at, status, area, ref_code")
       .order("created_at", { ascending: false })
       .limit(10);
 
-    const { data: donutRaw } = await supabase
+    const donutRes = await supabase
       .from("reports")
       .select("category")
       .gte("created_at", start.toISOString());
+    let reports = reportsRes.data ?? [];
+    let donutRaw = donutRes.data ?? [];
 
-    const donutMap = (donutRaw ?? []).reduce<Record<string, number>>(
+    const tableMissing =
+      isDemoMode &&
+      (isMissingReportsTableError(reportsRes.error?.message) ||
+        isMissingReportsTableError(donutRes.error?.message));
+
+    if (tableMissing) {
+      const demoReports = await readDemoReports();
+      reports = demoReports.slice(0, 10);
+      donutRaw = demoReports
+        .filter((item) => new Date(item.created_at) >= start)
+        .map((item) => ({ category: item.category }));
+    } else if (reportsRes.error || donutRes.error) {
+      throw reportsRes.error ?? donutRes.error;
+    }
+
+    const reportsInRangeCount = donutRaw.length;
+
+    const donutMap = donutRaw.reduce<Record<string, number>>(
       (acc, item) => {
         acc[item.category] = (acc[item.category] ?? 0) + 1;
         return acc;
@@ -100,20 +126,21 @@ export async function GET(request: Request) {
       kpis: {
         pageViews: currentSum.pageViews,
         chatSessions: currentSum.chatSessions,
-        reportsCount: currentSum.reportsCount,
+        // Use live reports for instant feedback when users submit test reports.
+        reportsCount: reportsInRangeCount,
         articlesRead: currentSum.articlesRead,
         changes: {
           pageViews: percent(currentSum.pageViews, prevSum.pageViews),
           chatSessions: percent(currentSum.chatSessions, prevSum.chatSessions),
-          reportsCount: percent(currentSum.reportsCount, prevSum.reportsCount),
+          reportsCount: percent(reportsInRangeCount, prevSum.reportsCount),
           articlesRead: percent(currentSum.articlesRead, prevSum.articlesRead),
         },
       },
       traffic,
       donut,
-      reports: reports ?? [],
+      reports,
     });
-  } catch (error) {
-    return NextResponse.json({ message: "Có lỗi xảy ra." }, { status: 500 });
+  } catch {
+    return NextResponse.json({ message: "Internal error." }, { status: 500 });
   }
 }
